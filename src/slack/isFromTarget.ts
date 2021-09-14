@@ -1,4 +1,4 @@
-import { env } from "src/constants/env";
+import { env } from "~/constants/env";
 import { SlackMessage } from "./type";
 
 export const isFromTarget = (message: SlackMessage) =>
