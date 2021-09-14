@@ -1,15 +1,15 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-
-const urlVerificationType = "url_verification";
+import { debug } from "src/libs/debug";
+import { isFromTarget } from "src/slack/isFromTarget";
+import { isValidSlackMessage } from "src/slack/type";
 
 export default (req: VercelRequest, res: VercelResponse) => {
-  console.log(req.body);
-  if (!!req.body && req.body.type === urlVerificationType) {
-    res.send({
-      text: "Hello SlackApp!",
-      challenge: req.body.challenge,
-    });
-  }
+  debug("req.body", "log", req.body);
+  const isValid = isValidSlackMessage(req.body) && isFromTarget(req.body);
+  debug("is valid request", "log", isValid);
+
+  if (!isValid) return;
+
   res.send({
     text: "Hello World!",
   });
