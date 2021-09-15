@@ -1,16 +1,18 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { debug } from "./libs/debug";
 import { isFromTarget } from "./slack/isFromTarget";
+import { parse } from "./slack/parse";
 import { isValidSlackMessage } from "./slack/type";
 
 export default (req: VercelRequest, res: VercelResponse) => {
-  debug("req.body", "log", req.body);
-  const isValid = isValidSlackMessage(req.body) && isFromTarget(req.body);
-  debug("is valid request", "log", isValid);
+  const body = req.body;
+  debug("req.body", "log", body);
+  const isValid = isValidSlackMessage(body) && isFromTarget(body);
 
   if (!isValid) return;
 
+  const result = parse(body.text);
   res.send({
-    text: "Hello World!",
+    text: JSON.stringify(result),
   });
 };
