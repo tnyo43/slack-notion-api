@@ -8,7 +8,14 @@ const envSlack = {
   SLACK_KEY_WORD: split(process.env.SLACK_KEY_WORD),
 };
 
+const envNotion = {
+  NOTION_INTEGRATION_INTERNAL_TOKEN:
+    process.env.NOTION_INTEGRATION_INTERNAL_TOKEN || "",
+  NOTION_TEST_DB_ID: process.env.NOTION_TEST_DB_ID || "",
+};
+
 export const env = {
   DEBUG_MODE: process.env.DEBUG_MODE === "true",
   ...envSlack,
+  ...envNotion,
 };
