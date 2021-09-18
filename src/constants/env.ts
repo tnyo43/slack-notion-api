@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 const split = (words: string | undefined) =>
   words === undefined ? [] : words.split(" ").filter((word) => word !== "");
 
