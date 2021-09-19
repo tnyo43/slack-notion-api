@@ -20,6 +20,7 @@ const errorMessage: ProblemMessage = {
 };
 
 const parse = (text: string[]): ProblemMessage | InvalidMessage | undefined => {
+  console.log(text, text[0] === keyWord);
   if (text.length < 1 || text[0] !== keyWord) return undefined;
   if (text.length === 1) return errorMessage;
 
