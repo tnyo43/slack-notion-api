@@ -1,12 +1,15 @@
 import axios from "axios";
+import { Page } from "./type";
 
 type ApiClientKey = { databaseId: string; token: string };
 
-interface IApiClient {
-  post: () => Promise<any>;
+interface IApiClient<Label extends string, Data extends Page.DataType<Label>> {
+  post: (page: Page.Page<Label, Data>) => Promise<any>;
 }
 
-class ApiClient implements IApiClient {
+class ApiClient<Label extends string, Data extends Page.DataType<Label>>
+  implements IApiClient<Label, Data>
+{
   private databaseId: string;
   private token: string;
 
@@ -15,22 +18,12 @@ class ApiClient implements IApiClient {
     this.token = key.token;
   }
 
-  async post() {
+  async post(page: Page.Page<Label, Data>) {
     return axios.post<any>(
       "https://api.notion.com/v1/pages",
       {
         parent: { database_id: this.databaseId },
-        properties: {
-          Name: {
-            title: [
-              {
-                text: {
-                  content: "連休の予定",
-                },
-              },
-            ],
-          },
-        },
+        properties: Page.notionPageApiObjectOf(page),
       },
       {
         headers: {
@@ -43,19 +36,9 @@ class ApiClient implements IApiClient {
   }
 }
 
-class ApiClientFactory {
-  private static apis = new Map<string, ApiClient>();
-
-  static getApiClientInstance(key: ApiClientKey) {
-    const keyText = key.databaseId + key.token; // Hash のような役割
-
-    const client = ApiClientFactory.apis.get(keyText);
-    if (client) return client;
-
-    const newClient = new ApiClient(key);
-    ApiClientFactory.apis.set(keyText, newClient);
-    return newClient;
-  }
-}
-
-export const getApiClient = ApiClientFactory.getApiClientInstance;
+export const getApiClient = <
+  Label extends string,
+  Data extends Page.DataType<Label>
+>(
+  key: ApiClientKey
+) => new ApiClient<Label, Data>(key);
