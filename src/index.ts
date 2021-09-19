@@ -5,7 +5,7 @@ const main = async () => {
   try {
     await apiCliet.postProblem({
       title: "こんにちは",
-      hardness: 2,
+      stressLevel: 2,
     });
   } catch (error: any) {
     debug("post", "error", error.response.data);
