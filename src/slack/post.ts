@@ -7,7 +7,7 @@ import {
 
 const defaultInvalidMessage = `次のキーワードを入力してください "${problemKeyword}"`;
 
-export const post = (message: string): string => {
+export const post = async (message: string): Promise<string> => {
   const words = message
     .split(" ")
     .filter(
@@ -26,7 +26,8 @@ export const post = (message: string): string => {
     console.log(JSON.stringify(message));
     if (message === undefined) continue;
     if (message.type === "invalid") return message.content;
-    handler.action(message);
+    const result = await handler.action(message);
+    return result;
   }
 
   return defaultInvalidMessage;
