@@ -4,14 +4,18 @@ import { isFromTarget } from "./slack/isFromTarget";
 import { parse } from "./slack/parse";
 import { isValidSlackMessage } from "./slack/type";
 
+const judgeAndParse = (body: any) =>
+  isValidSlackMessage(body) && isFromTarget(body)
+    ? parse(body.text)
+    : undefined;
+
 export default (req: VercelRequest, res: VercelResponse) => {
   const body = req.body;
   debug("req.body", "log", body);
-  const isValid = isValidSlackMessage(body) && isFromTarget(body);
 
-  if (!isValid) return;
+  const result = judgeAndParse(body);
+  if (result === undefined) return;
 
-  const result = parse(body.text);
   res.send({
     text: JSON.stringify(result),
   });
