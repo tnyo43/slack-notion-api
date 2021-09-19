@@ -13,8 +13,8 @@ const isValidStressLevel = (n: number | undefined): n is StressLevel =>
   n === undefined || (!Number.isNaN(n) && (n === 1 || n === 2 || n === 3));
 
 const keyWord = "つらみ";
-const errorMessage: ProblemMessage = {
-  type: "problem",
+const invalidMessage: InvalidMessage = {
+  type: "invalid",
   content:
     '次のフォーマットで投稿してください "つらみ ○○がない (1 | 2 | 3 | [empty])"',
 };
@@ -22,11 +22,11 @@ const errorMessage: ProblemMessage = {
 const parse = (text: string[]): ProblemMessage | InvalidMessage | undefined => {
   console.log(text, text[0] === keyWord);
   if (text.length < 1 || text[0] !== keyWord) return undefined;
-  if (text.length === 1) return errorMessage;
+  if (text.length === 1) return invalidMessage;
 
   const content = text[1];
   const stressLevel = text.length === 2 ? undefined : Number(text[2]);
-  if (!isValidStressLevel(stressLevel)) return errorMessage;
+  if (!isValidStressLevel(stressLevel)) return invalidMessage;
   return {
     type: "problem",
     content,
