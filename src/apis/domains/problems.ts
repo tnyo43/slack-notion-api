@@ -10,7 +10,7 @@ type PageType = DataType & { title: Page.Title };
 
 const labelDisplayMap: Page.LabelDisplayMap<Label> = {
   title: "Name",
-  hardness: "hoge",
+  hardness: "つらさ度合",
 };
 
 const apiClient = getApiClient<Label, PageType>(
