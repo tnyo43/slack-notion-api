@@ -23,6 +23,7 @@ export const post = (message: string): string => {
 
   for (const handler of [problemMessageHandler]) {
     const message = handler.parse(words);
+    console.log(JSON.stringify(message));
     if (message === undefined) continue;
     if (message.type === "invalid") return message.content;
     handler.action(message);
