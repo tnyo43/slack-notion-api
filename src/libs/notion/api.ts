@@ -21,12 +21,6 @@ class ApiClient<Label extends string, Data extends Page.DataType<Label>>
   }
 
   async post(page: Page.Page<Label, Data>) {
-    console.log(
-      JSON.stringify({
-        parent: { database_id: this.databaseId },
-        properties: Page.notionPageApiObjectOf(page, this.labelDisplayMap),
-      })
-    );
     return axios.post<any>(
       "https://api.notion.com/v1/pages",
       {
