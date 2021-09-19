@@ -23,7 +23,6 @@ export const post = async (message: string): Promise<string> => {
 
   for (const handler of [problemMessageHandler]) {
     const message = handler.parse(words);
-    console.log(JSON.stringify(message));
     if (message === undefined) continue;
     if (message.type === "invalid") return message.content;
     const result = await handler.action(message);
