@@ -12,18 +12,26 @@ class ApiClient<Label extends string, Data extends Page.DataType<Label>>
 {
   private databaseId: string;
   private token: string;
+  private labelDisplayMap: Page.LabelDisplayMap<Label>;
 
-  constructor(key: ApiClientKey) {
+  constructor(key: ApiClientKey, labelDisplayMap: Page.LabelDisplayMap<Label>) {
     this.databaseId = key.databaseId;
     this.token = key.token;
+    this.labelDisplayMap = labelDisplayMap;
   }
 
   async post(page: Page.Page<Label, Data>) {
+    console.log(
+      JSON.stringify({
+        parent: { database_id: this.databaseId },
+        properties: Page.notionPageApiObjectOf(page, this.labelDisplayMap),
+      })
+    );
     return axios.post<any>(
       "https://api.notion.com/v1/pages",
       {
         parent: { database_id: this.databaseId },
-        properties: Page.notionPageApiObjectOf(page),
+        properties: Page.notionPageApiObjectOf(page, this.labelDisplayMap),
       },
       {
         headers: {
@@ -40,5 +48,6 @@ export const getApiClient = <
   Label extends string,
   Data extends Page.DataType<Label>
 >(
-  key: ApiClientKey
-) => new ApiClient<Label, Data>(key);
+  key: ApiClientKey,
+  labelDisplayMap: Page.LabelDisplayMap<Label>
+) => new ApiClient<Label, Data>(key, labelDisplayMap);

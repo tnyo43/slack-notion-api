@@ -15,6 +15,7 @@ const envNotion = {
   NOTION_INTEGRATION_INTERNAL_TOKEN:
     process.env.NOTION_INTEGRATION_INTERNAL_TOKEN || "",
   NOTION_TEST_DB_ID: process.env.NOTION_TEST_DB_ID || "",
+  NOTION_PROBLEM_DB_ID: process.env.NOTION_PROBLEM_DB_ID || "",
 };
 
 export const env = {

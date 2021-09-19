@@ -5,12 +5,16 @@ export namespace Page {
   export type Type = Number | RichText | Select<string>;
   export type DataType<Label extends string> = { [key in Label]?: Type };
 
-  export type Title = Omit<RichText, "type"> & { type: "title"; label: string };
+  export type Title = Omit<RichText, "type"> & { type: "title" };
 
   export type Page<
     Label extends string,
-    Data extends DataType<Label>
+    Data extends DataType<Label> = DataType<Label>
   > = Partial<Data & { title: Title }>;
+
+  export type LabelDisplayMap<Label extends string> = {
+    [key in Label | "title"]: string;
+  };
 
   export const number = (value: number): Number => ({
     type: "number",
@@ -24,10 +28,9 @@ export namespace Page {
     type: "select",
     option,
   });
-  export const title = (label: string, content: string): Title => ({
+  export const title = (content: string): Title => ({
     ...richText(content),
     type: "title",
-    label,
   });
 
   const numberOf = (number: Page.Number) => ({
@@ -47,10 +50,10 @@ export namespace Page {
       name: select.option,
     },
   });
-  const titleOf = (title: Page.Title | undefined) =>
+  const titleOf = (title: Page.Title | undefined, displayName: string) =>
     title
       ? {
-          [title.label]: {
+          [displayName]: {
             title: [
               {
                 text: {
@@ -66,9 +69,10 @@ export namespace Page {
     Label extends string,
     Data extends Page.DataType<Label>
   >(
-    page: Page.Page<Label, Data>
+    page: Page.Page<Label, Data>,
+    keyDisplayMap: LabelDisplayMap<Label>
   ) => {
-    const convert = (key: string, property: Page.Type | undefined) => {
+    const convert = (displayName: string, property: Page.Type | undefined) => {
       if (property === undefined) return {};
       const obj =
         property.type === "number"
@@ -77,17 +81,17 @@ export namespace Page {
           ? richTextOf(property)
           : selectOf(property);
       return {
-        [key]: obj,
+        [displayName]: obj,
       };
     };
 
     const { title, ...data } = page;
     return {
-      ...titleOf(title),
+      ...titleOf(title, keyDisplayMap.title),
       ...(Object.keys(data) as Label[]).reduce(
         (acc, key) => ({
           ...acc,
-          ...convert(key, data[key]),
+          ...convert(keyDisplayMap[key], data[key]),
         }),
         {}
       ),
