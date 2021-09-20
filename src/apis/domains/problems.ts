@@ -1,7 +1,6 @@
 import { getApiClient } from "../../libs/notion";
 import { env } from "../../constants/env";
 import { Page } from "../../libs/notion/type";
-import axios from "axios";
 
 type Label = "stressLevel";
 
@@ -39,42 +38,26 @@ export namespace ProblemParams {
 
 export const problemsApiClient = {
   fetchProblems: async (params: ProblemParams.FetchProblems) => {
-    return axios.post(
-      `https://api.notion.com/v1/databases/${env.NOTION_PROBLEM_DB_ID}/query`,
-      {
-        filter: {
-          and: [
-            ...(params.keyword
-              ? [
-                  {
-                    property: "Name",
-                    text: {
-                      contains: params.keyword,
-                    },
-                  },
-                ]
-              : []),
-          ],
+    return await apiClient.fetchAll({
+      filter: params.keyword
+        ? {
+            type: "text",
+            property: "title",
+            condition: "contains",
+            value: params.keyword,
+          }
+        : undefined,
+      sort: [
+        {
+          property: "stressLevel",
+          direction: "descending",
         },
-        sorts: [
-          {
-            property: "つらさ度合",
-            direction: "descending",
-          },
-          {
-            timestamp: "created_time",
-            direction: "descending",
-          },
-        ],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${env.NOTION_INTEGRATION_INTERNAL_TOKEN}`,
-          "Notion-Version": "2021-05-13",
-          "Content-Type": "application/json",
+        {
+          property: "created_time",
+          direction: "descending",
         },
-      }
-    );
+      ],
+    });
   },
 
   postProblem: async (params: ProblemParams.PostProblem) => {

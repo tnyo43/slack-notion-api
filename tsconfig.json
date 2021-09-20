@@ -12,7 +12,8 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": false,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "keyofStringsOnly": true
   },
   "include": ["src/**/*"]
 }

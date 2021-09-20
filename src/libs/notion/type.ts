@@ -1,3 +1,8 @@
+type Timestamp = "created_time" | "last_edited_time";
+type Direction = "ascending" | "descending";
+export const isTimestamp = (text: string): text is Timestamp =>
+  text === "created_time" || text === "last_edited_time";
+
 export namespace Page {
   export type Number = { type: "number"; value: number };
   export type RichText = { type: "rich_text"; content: string };
@@ -11,6 +16,58 @@ export namespace Page {
     Label extends string,
     Data extends DataType<Label> = DataType<Label>
   > = Partial<Data & { title: Title }>;
+
+  type NumberCondition =
+    | "equals"
+    | "does_not_equal"
+    | "greater_than"
+    | "less_than"
+    | "greater_than_or_equal_to"
+    | "less_than_or_equal_to";
+  type TextCondition =
+    | "equals"
+    | "does_not_equal"
+    | "contains"
+    | "does_not_contain"
+    | "starts_with"
+    | "ends_with";
+  type NumberFilter<Label extends string> = {
+    type: "number";
+    property: Label;
+    condition: NumberCondition;
+    value: number;
+  };
+  type TextFilter<Label extends string> = {
+    type: "text";
+    property: Label;
+    condition: TextCondition;
+    value: string;
+  };
+
+  // https://github.com/microsoft/TypeScript/issues/38646#issuecomment-700829042
+  type FilterByType<
+    Data extends { [key in string]?: { type: string } },
+    KeyWord extends string
+  > = {
+    [K in keyof Data as Data[K] extends { type: KeyWord } ? K : never]: Data[K];
+  };
+
+  export type Filter<Label extends string, Data extends DataType<Label>> =
+    | NumberFilter<keyof FilterByType<Data, "number">>
+    | TextFilter<keyof FilterByType<Data, "rich_text"> | "title">;
+
+  export type SortPage<Label extends string> = {
+    property: Label | Timestamp;
+    direction: Direction;
+  }[];
+
+  export type FetchParams<
+    Label extends string,
+    Data extends DataType<Label>
+  > = {
+    filter?: Filter<Label, Data>;
+    sort?: SortPage<Label>;
+  };
 
   export type LabelDisplayMap<Label extends string> = {
     [key in Label | "title"]: string;

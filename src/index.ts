@@ -9,7 +9,9 @@ const main = async () => {
         created_time: string;
         properties: {};
       }[]
-    ).forEach((result) => console.log(result.created_time, result.properties));
+    ).forEach((result) =>
+      console.log(JSON.stringify(result.properties), result.created_time)
+    );
   } catch (error: any) {
     debug("post", "error", error.response.data);
   }
