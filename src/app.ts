@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { debug } from "./libs/debug";
+import { debug } from "./utils/debug";
 import { isFromTarget } from "./slack/isFromTarget";
 import { post } from "./slack/post";
 import { isValidSlackMessage } from "./slack/type";
