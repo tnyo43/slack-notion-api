@@ -29,6 +29,7 @@ const stressLevelOfNumber = (
 export namespace ProblemParams {
   export type FetchProblems = {
     keyword?: string;
+    stressLevel?: 1 | 2 | 3;
   };
   export type PostProblem = {
     title: string;
@@ -39,12 +40,20 @@ export namespace ProblemParams {
 export const problemsApiClient = {
   fetchProblems: async (params: ProblemParams.FetchProblems) => {
     return await apiClient.fetchAll({
-      filter: params.keyword
+      // filter: params.keyword
+      //   ? {
+      //       type: "text",
+      //       property: "title",
+      //       condition: "contains",
+      //       value: params.keyword,
+      //     }
+      //   : undefined,
+      filter: params.stressLevel
         ? {
-            type: "text",
-            property: "title",
-            condition: "contains",
-            value: params.keyword,
+            type: "select",
+            property: "stressLevel",
+            condition: "equals",
+            value: "😭😭😭",
           }
         : undefined,
       sort: [

@@ -3,7 +3,10 @@ import { debug } from "./utils/debug";
 
 const main = async () => {
   try {
-    const result = await apiCliet.fetchProblems({ keyword: "洗濯物" });
+    const result = await apiCliet.fetchProblems({
+      keyword: "洗濯物",
+      stressLevel: 2,
+    });
     (
       result.data.results as {
         created_time: string;

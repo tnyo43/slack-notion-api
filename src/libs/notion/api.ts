@@ -26,7 +26,7 @@ class ApiClient<Label extends string, Data extends Page.DataType<Label>>
 
   async fetchAll(fetchCondition: Page.FetchParams<Label, Data>) {
     const getFilter = (formula: Page.Filter<Label, Data>) => ({
-      property: formula.property,
+      property: this.labelDisplayMap[formula.property as Label],
       [formula.type]: {
         [formula.condition]: formula.value,
       },

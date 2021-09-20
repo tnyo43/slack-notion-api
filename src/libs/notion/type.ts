@@ -4,11 +4,16 @@ export const isTimestamp = (text: string): text is Timestamp =>
   text === "created_time" || text === "last_edited_time";
 
 export namespace Page {
-  export type Number = { type: "number"; value: number };
-  export type RichText = { type: "rich_text"; content: string };
-  export type Select<T extends string> = { type: "select"; option: T };
-  export type Type = Number | RichText | Select<string>;
-  export type DataType<Label extends string> = { [key in Label]?: Type };
+  export type Number = { type: "number"; value: number | undefined };
+  export type RichText = { type: "rich_text"; content: string | undefined };
+  export type Select<T extends string> = {
+    type: "select";
+    option: T | undefined;
+  };
+  export type Type<T extends string = string> = Number | RichText | Select<T>;
+  export type DataType<Label extends string> = {
+    [key in Label]: Type;
+  };
 
   export type Title = Omit<RichText, "type"> & { type: "title" };
 
@@ -24,6 +29,7 @@ export namespace Page {
     | "less_than"
     | "greater_than_or_equal_to"
     | "less_than_or_equal_to";
+  type SelectCondition = "equals" | "does_not_equal";
   type TextCondition =
     | "equals"
     | "does_not_equal"
@@ -36,6 +42,15 @@ export namespace Page {
     property: Label;
     condition: NumberCondition;
     value: number;
+  };
+  type SelectFilter<
+    Label extends string,
+    Data extends { [key in Label]?: { type: "select"; option: string } }
+  > = {
+    type: "select";
+    property: Label;
+    condition: SelectCondition;
+    value: Data[Label] extends { option: infer Option } ? Option : never;
   };
   type TextFilter<Label extends string> = {
     type: "text";
@@ -52,8 +67,13 @@ export namespace Page {
     [K in keyof Data as Data[K] extends { type: KeyWord } ? K : never]: Data[K];
   };
 
-  export type Filter<Label extends string, Data extends DataType<Label>> =
+  export type Filter<
+    Label extends string,
+    Data extends DataType<Label>,
+    _SeletcData = FilterByType<Data, "select">
+  > =
     | NumberFilter<keyof FilterByType<Data, "number">>
+    | SelectFilter<keyof _SeletcData, _SeletcData>
     | TextFilter<keyof FilterByType<Data, "rich_text"> | "title">;
 
   export type SortPage<Label extends string> = {
