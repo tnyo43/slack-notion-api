@@ -1,5 +1,5 @@
 import { apiCliet } from "./apis";
-import { debug } from "./libs/debug";
+import { debug } from "./utils/debug";
 
 const main = async () => {
   try {
