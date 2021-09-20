@@ -1,5 +1,5 @@
 import { env } from "../constants/env";
-import { debug } from "../libs/debug";
+import { debug } from "../utils/debug";
 import {
   problemKeyword,
   problemMessageHandler,
