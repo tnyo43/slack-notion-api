@@ -74,11 +74,11 @@ export const problemsApiClient = {
   postProblem: async (params: ProblemParams.PostProblem) => {
     const stressLevel = stressLevelOfNumber(params.stressLevel);
     return await apiClient.post({
-      title: Page.title(params.title),
+      title: Page.Property.title(params.title),
       stressLevel:
         stressLevel === undefined
           ? undefined
-          : Page.select<LabelOfstressLevel>(stressLevel),
+          : Page.Property.select<LabelOfstressLevel>(stressLevel),
     });
   },
 };

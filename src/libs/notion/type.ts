@@ -9,6 +9,60 @@ export namespace Page {
     export type Type<T extends string = string> = Number | RichText | Select<T>;
     export type Title = Omit<RichText, "type"> & { type: "title" };
 
+    export const number = (value: number): Property.Number => ({
+      type: "number",
+      value,
+    });
+    export const richText = (content: string): Property.RichText => ({
+      type: "rich_text",
+      content,
+    });
+    export const select = <T extends string>(
+      option: T
+    ): Property.Select<T> => ({
+      type: "select",
+      option,
+    });
+    export const title = (content: string): Property.Title => ({
+      ...richText(content),
+      type: "title",
+    });
+
+    export const numberOf = (number: Property.Number) => ({
+      number: number.value,
+    });
+    export const richTextOf = (richText: Property.RichText) => ({
+      rich_text: [
+        {
+          text: {
+            content: richText.content,
+          },
+        },
+      ],
+    });
+    export const selectOf = (select: Property.Select<string>) => ({
+      select: {
+        name: select.option,
+      },
+    });
+    export const titleOf = (
+      title: Property.Title | undefined,
+      displayName: string
+    ) =>
+      title
+        ? {
+            [displayName]: {
+              title: [
+                {
+                  text: {
+                    content: title.content,
+                  },
+                },
+              ],
+            },
+          }
+        : {};
+
     export type LabelDisplayMap<Label extends string> = {
       [key in Label | "title"]: string;
     };
@@ -40,11 +94,12 @@ export namespace Page {
       | "ends_with";
 
     // https://github.com/microsoft/TypeScript/issues/38646#issuecomment-700829042
-    type FilterByType<
-      Data extends { [key in string]?: { type: string } },
-      KeyWord extends string
-    > = {
-      [K in keyof Data as Data[K] extends { type: KeyWord }
+    export type FilteredKeyObjectKeyValue<
+      ObjectKey extends string,
+      KeyWord extends string,
+      Data extends { [key in string]?: { [key in ObjectKey]: string } }
+    > = keyof {
+      [K in keyof Data as Data[K] extends { [key in ObjectKey]: KeyWord }
         ? K
         : never]: Data[K];
     };
@@ -55,13 +110,15 @@ export namespace Page {
     > =
       | {
           type: "number";
-          property: keyof FilterByType<Data, "number">;
+          property: FilteredKeyObjectKeyValue<"type", "number", Data>;
           condition: NumberCondition;
           value: number;
         }
       | {
           type: "text";
-          property: "title" | keyof FilterByType<Data, "rich_text">;
+          property:
+            | "title"
+            | FilteredKeyObjectKeyValue<"type", "rich_text", Data>;
           condition: TextCondition;
           value: string;
         };
@@ -87,55 +144,6 @@ export namespace Page {
     };
   }
 
-  export const number = (value: number): Property.Number => ({
-    type: "number",
-    value,
-  });
-  export const richText = (content: string): Property.RichText => ({
-    type: "rich_text",
-    content,
-  });
-  export const select = <T extends string>(option: T): Property.Select<T> => ({
-    type: "select",
-    option,
-  });
-  export const title = (content: string): Property.Title => ({
-    ...richText(content),
-    type: "title",
-  });
-
-  const numberOf = (number: Property.Number) => ({
-    number: number.value,
-  });
-  const richTextOf = (richText: Property.RichText) => ({
-    rich_text: [
-      {
-        text: {
-          content: richText.content,
-        },
-      },
-    ],
-  });
-  const selectOf = (select: Property.Select<string>) => ({
-    select: {
-      name: select.option,
-    },
-  });
-  const titleOf = (title: Property.Title | undefined, displayName: string) =>
-    title
-      ? {
-          [displayName]: {
-            title: [
-              {
-                text: {
-                  content: title.content,
-                },
-              },
-            ],
-          },
-        }
-      : {};
-
   export const notionPageApiObjectOf = <
     Label extends string,
     Data extends Page.DataType<Label>
@@ -150,10 +158,10 @@ export namespace Page {
       if (property === undefined) return {};
       const obj =
         property.type === "number"
-          ? numberOf(property)
+          ? Property.numberOf(property)
           : property.type === "rich_text"
-          ? richTextOf(property)
-          : selectOf(property);
+          ? Property.richTextOf(property)
+          : Property.selectOf(property);
       return {
         [displayName]: obj,
       };
@@ -161,7 +169,7 @@ export namespace Page {
 
     const { title, ...data } = page;
     return {
-      ...titleOf(title, keyDisplayMap.title),
+      ...Property.titleOf(title, keyDisplayMap.title),
       ...(Object.keys(data) as Label[]).reduce(
         (acc, key) => ({
           ...acc,
