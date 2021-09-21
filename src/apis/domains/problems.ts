@@ -5,10 +5,12 @@ import { Page } from "../../libs/notion/type";
 type Label = "stressLevel";
 
 type LabelOfstressLevel = "😗" | "😭😭😭" | "🤢🤢🤢🤢🤢";
-type DataType = { stressLevel: Page.Select<LabelOfstressLevel> };
-type PageType = DataType & { title: Page.Title };
+type DataType = {
+  stressLevel: Page.Property.Select<LabelOfstressLevel>;
+};
+type PageType = DataType & { title: Page.Property.Title };
 
-const labelDisplayMap: Page.LabelDisplayMap<Label> = {
+const labelDisplayMap: Page.Property.LabelDisplayMap<Label> = {
   title: "Name",
   stressLevel: "つらさ度合",
 };
@@ -40,22 +42,22 @@ export namespace ProblemParams {
 export const problemsApiClient = {
   fetchProblems: async (params: ProblemParams.FetchProblems) => {
     return await apiClient.fetchAll({
-      // filter: params.keyword
-      //   ? {
-      //       type: "text",
-      //       property: "title",
-      //       condition: "contains",
-      //       value: params.keyword,
-      //     }
-      //   : undefined,
-      filter: params.stressLevel
+      filter: params.keyword
         ? {
-            type: "select",
-            property: "stressLevel",
-            condition: "equals",
-            value: "😭😭😭",
+            type: "text",
+            property: "title",
+            condition: "contains",
+            value: params.keyword,
           }
         : undefined,
+      // filter: params.stressLevel
+      //   ? {
+      //       type: "select",
+      //       property: "stressLevel",
+      //       condition: "equals",
+      //       value: "😭😭😭",
+      //     }
+      //   : undefined,
       sort: [
         {
           property: "stressLevel",
