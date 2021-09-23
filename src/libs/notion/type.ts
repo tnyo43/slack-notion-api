@@ -1,37 +1,38 @@
-export namespace Page {
-  export namespace Property {
-    export type Number = { type: "number"; value: number | undefined };
-    export type RichText = { type: "rich_text"; content: string | undefined };
-    export type Select<T extends string> = {
+export namespace _Page {
+  export namespace _Property {
+    export type _Number = { type: "number"; value: number | undefined };
+    export type _RichText = { type: "rich_text"; content: string | undefined };
+    export type _Select<T extends string> = {
       type: "select";
       option: T | undefined;
     };
-    export type Type<T extends string = string> = Number | RichText | Select<T>;
-    export type Title = Omit<RichText, "type"> & { type: "title" };
+    export type _Type<T extends string = string> =
+      | _Number
+      | _RichText
+      | _Select<T>;
+    export type _Title = Omit<_RichText, "type"> & { type: "title" };
 
-    export const number = (value: number): Property.Number => ({
+    export const _number = (value: number): _Number => ({
       type: "number",
       value,
     });
-    export const richText = (content: string): Property.RichText => ({
+    export const _richText = (content: string): _RichText => ({
       type: "rich_text",
       content,
     });
-    export const select = <T extends string>(
-      option: T
-    ): Property.Select<T> => ({
+    export const _select = <T extends string>(option: T): _Select<T> => ({
       type: "select",
       option,
     });
-    export const title = (content: string): Property.Title => ({
-      ...richText(content),
+    export const _title = (content: string): _Title => ({
+      ..._richText(content),
       type: "title",
     });
 
-    export const numberOf = (number: Property.Number) => ({
+    export const _numberOf = (number: _Number) => ({
       number: number.value,
     });
-    export const richTextOf = (richText: Property.RichText) => ({
+    export const _richTextOf = (richText: _RichText) => ({
       rich_text: [
         {
           text: {
@@ -40,15 +41,12 @@ export namespace Page {
         },
       ],
     });
-    export const selectOf = (select: Property.Select<string>) => ({
+    export const _selectOf = (select: _Select<string>) => ({
       select: {
         name: select.option,
       },
     });
-    export const titleOf = (
-      title: Property.Title | undefined,
-      displayName: string
-    ) =>
+    export const _titleOf = (title: _Title | undefined, displayName: string) =>
       title
         ? {
             [displayName]: {
@@ -63,21 +61,23 @@ export namespace Page {
           }
         : {};
 
-    export type LabelDisplayMap<Label extends string> = {
+    export type _LabelDisplayMap<Label extends string> = {
       [key in Label | "title"]: string;
     };
   }
 
-  export type DataType<Label extends string> = {
-    [key in Label]: Property.Type;
-  };
+  export namespace _Data {
+    export type _DataType<Label extends string> = {
+      [key in Label]: _Property._Type;
+    };
 
-  export type Page<
-    Label extends string,
-    Data extends DataType<Label> = DataType<Label>
-  > = Partial<Data & { title: Property.Title }>;
+    export type _Page<
+      Label extends string,
+      Data extends _DataType<Label> = _DataType<Label>
+    > = Data & { title: _Property._Title };
+  }
 
-  export namespace Filter {
+  export namespace _Filter {
     type NumberCondition =
       | "equals"
       | "does_not_equal"
@@ -94,7 +94,7 @@ export namespace Page {
       | "ends_with";
 
     // https://github.com/microsoft/TypeScript/issues/38646#issuecomment-700829042
-    export type FilteredKeyObjectKeyValue<
+    export type _FilteredKeyObjectKeyValue<
       ObjectKey extends string,
       KeyWord extends string,
       Data extends { [key in string]?: { [key in ObjectKey]: string } }
@@ -104,13 +104,13 @@ export namespace Page {
         : never]: Data[K];
     };
 
-    export type FilterPage<
+    export type _Param<
       Label extends string,
-      Data extends DataType<Label>
+      Data extends _Data._DataType<Label>
     > =
       | {
           type: "number";
-          property: FilteredKeyObjectKeyValue<"type", "number", Data>;
+          property: _FilteredKeyObjectKeyValue<"type", "number", Data>;
           condition: NumberCondition;
           value: number;
         }
@@ -118,50 +118,53 @@ export namespace Page {
           type: "text";
           property:
             | "title"
-            | FilteredKeyObjectKeyValue<"type", "rich_text", Data>;
+            | _FilteredKeyObjectKeyValue<"type", "rich_text", Data>;
           condition: TextCondition;
           value: string;
         };
   }
 
-  export namespace Sort {
+  export namespace _Sort {
     type Direction = "ascending" | "descending";
     type Timestamp = "created_time" | "last_edited_time";
 
-    export const isTimestamp = (text: string): text is Timestamp =>
+    export const _isTimestamp = (text: string): text is Timestamp =>
       text === "created_time" || text === "last_edited_time";
 
-    export type SortPage<Label extends string> = {
+    export type _Params<Label extends string> = {
       property: Label | Timestamp;
       direction: Direction;
     }[];
   }
 
-  export namespace Fetch {
-    export type Params<Label extends string, Data extends DataType<Label>> = {
-      filter?: Filter.FilterPage<Label, Data>;
-      sort?: Sort.SortPage<Label>;
+  export namespace _Fetch {
+    export type _Params<
+      Label extends string,
+      Data extends _Data._DataType<Label>
+    > = {
+      filter?: _Filter._Param<Label, Data>;
+      sort?: _Sort._Params<Label>;
     };
   }
 
-  export const notionPageApiObjectOf = <
+  export const _notionPageApiObjectOf = <
     Label extends string,
-    Data extends Page.DataType<Label>
+    Data extends _Data._DataType<Label>
   >(
-    page: Page.Page<Label, Data>,
-    keyDisplayMap: Property.LabelDisplayMap<Label>
+    page: Partial<_Data._Page<Label, Data>>,
+    keyDisplayMap: _Property._LabelDisplayMap<Label>
   ) => {
     const convert = (
       displayName: string,
-      property: Property.Type | undefined
+      property: _Property._Type | undefined
     ) => {
       if (property === undefined) return {};
       const obj =
         property.type === "number"
-          ? Property.numberOf(property)
+          ? _Property._numberOf(property)
           : property.type === "rich_text"
-          ? Property.richTextOf(property)
-          : Property.selectOf(property);
+          ? _Property._richTextOf(property)
+          : _Property._selectOf(property);
       return {
         [displayName]: obj,
       };
@@ -169,7 +172,7 @@ export namespace Page {
 
     const { title, ...data } = page;
     return {
-      ...Property.titleOf(title, keyDisplayMap.title),
+      ..._Property._titleOf(title, keyDisplayMap.title),
       ...(Object.keys(data) as Label[]).reduce(
         (acc, key) => ({
           ...acc,
@@ -179,4 +182,44 @@ export namespace Page {
       ),
     };
   };
+}
+
+// usecase で import するのはここから下
+
+export namespace Page {
+  export namespace Property {
+    export type Number = _Page._Property._Number;
+    export type RichText = _Page._Property._RichText;
+    export type Select<Option extends string> = _Page._Property._Select<Option>;
+
+    export const number = _Page._Property._number;
+    export const richText = _Page._Property._richText;
+    export const select = _Page._Property._select;
+    export const title = _Page._Property._title;
+
+    export type LabelDisplayMap<Label extends string> =
+      _Page._Property._LabelDisplayMap<Label>;
+  }
+
+  export type Data<Label extends string> = _Page._Data._DataType<Label>;
+
+  export type DataWithTitle<
+    Label extends string,
+    Data extends _Page._Data._DataType<Label> = _Page._Data._DataType<Label>
+  > = _Page._Data._Page<Label, Data>;
+
+  export type FilterParam<
+    Label extends string,
+    Data extends _Page._Data._DataType<Label>
+  > = _Page._Filter._Param<Label, Data>;
+
+  export const isTimestamp = _Page._Sort._isTimestamp;
+  export type SortParams<Label extends string> = _Page._Sort._Params<Label>;
+
+  export type FetchParams<
+    Label extends string,
+    Data extends _Page._Data._DataType<Label>
+  > = _Page._Fetch._Params<Label, Data>;
+
+  export const notionPageApiObjectOf = _Page._notionPageApiObjectOf;
 }

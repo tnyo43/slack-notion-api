@@ -5,10 +5,10 @@ import { Page } from "../../libs/notion/type";
 type Label = "stressLevel";
 
 type LabelOfstressLevel = "😗" | "😭😭😭" | "🤢🤢🤢🤢🤢";
-type DataType = {
+type Data = {
   stressLevel: Page.Property.Select<LabelOfstressLevel>;
 };
-type PageType = DataType & { title: Page.Property.Title };
+type PageType = Page.DataWithTitle<Label, Data>;
 
 const labelDisplayMap: Page.Property.LabelDisplayMap<Label> = {
   title: "Name",

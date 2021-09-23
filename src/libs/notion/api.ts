@@ -3,11 +3,11 @@ import { Page } from "./type";
 
 type ApiClientKey = { databaseId: string; token: string };
 
-interface IApiClient<Label extends string, Data extends Page.DataType<Label>> {
-  post: (page: Page.Page<Label, Data>) => Promise<any>;
+interface IApiClient<Label extends string, Data extends Page.Data<Label>> {
+  post: (page: Page.DataWithTitle<Label, Data>) => Promise<any>;
 }
 
-class ApiClient<Label extends string, Data extends Page.DataType<Label>>
+class ApiClient<Label extends string, Data extends Page.Data<Label>>
   implements IApiClient<Label, Data>
 {
   private databaseId: string;
@@ -27,8 +27,8 @@ class ApiClient<Label extends string, Data extends Page.DataType<Label>>
     this.labelDisplayMap = labelDisplayMap;
   }
 
-  async fetchAll(fetchCondition: Page.Fetch.Params<Label, Data>) {
-    const getFilter = (formula: Page.Filter.FilterPage<Label, Data>) => ({
+  async fetchAll(fetchCondition: Page.FetchParams<Label, Data>) {
+    const getFilter = (formula: Page.FilterParam<Label, Data>) => ({
       property: this.labelDisplayMap[formula.property as Label],
       [formula.type]: {
         [formula.condition]: formula.value,
@@ -40,9 +40,9 @@ class ApiClient<Label extends string, Data extends Page.DataType<Label>>
         ? {}
         : { filter: getFilter(fetchCondition.filter) };
 
-    const getSorts = (sorts: Page.Sort.SortPage<Label>) =>
+    const getSorts = (sorts: Page.SortParams<Label>) =>
       sorts.map(({ property, direction }) => ({
-        ...(Page.Sort.isTimestamp(property)
+        ...(Page.isTimestamp(property)
           ? {
               timestamp: property,
             }
@@ -57,8 +57,6 @@ class ApiClient<Label extends string, Data extends Page.DataType<Label>>
         ? {}
         : { sorts: getSorts(fetchCondition.sort) };
 
-    console.log(filter, sorts);
-
     return axios.post(
       `https://api.notion.com/v1/databases/${this.databaseId}/query`,
       {
@@ -69,7 +67,7 @@ class ApiClient<Label extends string, Data extends Page.DataType<Label>>
     );
   }
 
-  async post(page: Page.Page<Label, Data>) {
+  async post(page: Partial<Page.DataWithTitle<Label, Data>>) {
     return axios.post<any>(
       "https://api.notion.com/v1/pages",
       {
@@ -83,7 +81,7 @@ class ApiClient<Label extends string, Data extends Page.DataType<Label>>
 
 export const getApiClient = <
   Label extends string,
-  Data extends Page.DataType<Label>
+  Data extends Page.Data<Label>
 >(
   key: ApiClientKey,
   labelDisplayMap: Page.Property.LabelDisplayMap<Label>
