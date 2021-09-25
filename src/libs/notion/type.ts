@@ -1,4 +1,4 @@
-export namespace _Page {
+namespace _Page {
   export namespace _Property {
     export type _Number = { type: "number"; value: number | undefined };
     export type _RichText = { type: "rich_text"; content: string | undefined };
@@ -6,10 +6,7 @@ export namespace _Page {
       type: "select";
       option: T | undefined;
     };
-    export type _Type<T extends string = string> =
-      | _Number
-      | _RichText
-      | _Select<T>;
+    export type _Type = _Number | _RichText | _Select<string>;
     export type _Title = Omit<_RichText, "type"> & { type: "title" };
 
     export const _number = (value: number): _Number => ({
@@ -64,6 +61,27 @@ export namespace _Page {
     export type _LabelDisplayMap<Label extends string> = {
       [key in Label | "title"]: string;
     };
+
+    // https://github.com/microsoft/TypeScript/issues/38646#issuecomment-700829042
+    type _TypeObjectKey<
+      Keyword extends string,
+      Data extends _Data._DataType<string>
+    > = keyof {
+      [K in keyof Data as Data[K] extends { type: Keyword }
+        ? K
+        : never]: Data[K];
+    };
+
+    export type _TextObjectKey<Data extends _Data._DataType<string>> =
+      _TypeObjectKey<"rich_text", Data>;
+    export type _NumberObjectKey<Data extends _Data._DataType<string>> =
+      _TypeObjectKey<"number", Data>;
+
+    export type _SelectObjectKey<Data extends _Data._DataType<string>> = keyof {
+      [K in keyof Data as Data[K] extends { type: "select"; option: any }
+        ? K
+        : never]: Data[K];
+    };
   }
 
   export namespace _Data {
@@ -92,36 +110,32 @@ export namespace _Page {
       | "does_not_contain"
       | "starts_with"
       | "ends_with";
-
-    // https://github.com/microsoft/TypeScript/issues/38646#issuecomment-700829042
-    export type _FilteredKeyObjectKeyValue<
-      ObjectKey extends string,
-      KeyWord extends string,
-      Data extends { [key in string]?: { [key in ObjectKey]: string } }
-    > = keyof {
-      [K in keyof Data as Data[K] extends { [key in ObjectKey]: KeyWord }
-        ? K
-        : never]: Data[K];
-    };
+    type SelectCondition = "equals" | "does_not_equal";
 
     export type _Param<
       Label extends string,
-      Data extends _Data._DataType<Label>
+      Data extends _Data._DataType<Label>,
+      SelectPropertyOption extends {
+        property: _Property._SelectObjectKey<Data>;
+        option: string;
+      }[]
     > =
       | {
           type: "number";
-          property: _FilteredKeyObjectKeyValue<"type", "number", Data>;
+          property: _Property._NumberObjectKey<Data>;
           condition: NumberCondition;
           value: number;
         }
       | {
           type: "text";
-          property:
-            | "title"
-            | _FilteredKeyObjectKeyValue<"type", "rich_text", Data>;
+          property: "title" | _Property._TextObjectKey<Data>;
           condition: TextCondition;
           value: string;
-        };
+        }
+      | ({
+          type: "select";
+          condition: SelectCondition;
+        } & SelectPropertyOption[number]);
   }
 
   export namespace _Sort {
@@ -135,16 +149,6 @@ export namespace _Page {
       property: Label | Timestamp;
       direction: Direction;
     }[];
-  }
-
-  export namespace _Fetch {
-    export type _Params<
-      Label extends string,
-      Data extends _Data._DataType<Label>
-    > = {
-      filter?: _Filter._Param<Label, Data>;
-      sort?: _Sort._Params<Label>;
-    };
   }
 
   export const _notionPageApiObjectOf = <
@@ -199,6 +203,8 @@ export namespace Page {
 
     export type LabelDisplayMap<Label extends string> =
       _Page._Property._LabelDisplayMap<Label>;
+    export type SelectObjectKey<Data extends Page.Data<string>> =
+      _Page._Property._SelectObjectKey<Data>;
   }
 
   export type Data<Label extends string> = _Page._Data._DataType<Label>;
@@ -210,16 +216,15 @@ export namespace Page {
 
   export type FilterParam<
     Label extends string,
-    Data extends _Page._Data._DataType<Label>
-  > = _Page._Filter._Param<Label, Data>;
+    Data extends _Page._Data._DataType<Label>,
+    SelectPropertyOption extends {
+      property: _Page._Property._SelectObjectKey<Data>;
+      option: string;
+    }[]
+  > = _Page._Filter._Param<Label, Data, SelectPropertyOption>;
 
   export const isTimestamp = _Page._Sort._isTimestamp;
   export type SortParams<Label extends string> = _Page._Sort._Params<Label>;
-
-  export type FetchParams<
-    Label extends string,
-    Data extends _Page._Data._DataType<Label>
-  > = _Page._Fetch._Params<Label, Data>;
 
   export const notionPageApiObjectOf = _Page._notionPageApiObjectOf;
 }

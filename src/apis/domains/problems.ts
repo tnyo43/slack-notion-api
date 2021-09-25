@@ -15,7 +15,11 @@ const labelDisplayMap: Page.Property.LabelDisplayMap<Label> = {
   stressLevel: "つらさ度合",
 };
 
-const apiClient = getApiClient<Label, PageType>(
+const apiClient = getApiClient<
+  Label,
+  PageType,
+  [{ property: "stressLevel"; option: LabelOfstressLevel }]
+>(
   {
     databaseId: env.NOTION_PROBLEM_DB_ID,
     token: env.NOTION_INTEGRATION_INTERNAL_TOKEN,

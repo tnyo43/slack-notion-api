@@ -3,12 +3,29 @@ import { Page } from "./type";
 
 type ApiClientKey = { databaseId: string; token: string };
 
-interface IApiClient<Label extends string, Data extends Page.Data<Label>> {
+interface IApiClient<
+  Label extends string,
+  Data extends Page.Data<Label>,
+  SelectKeyOption extends {
+    property: Page.Property.SelectObjectKey<Data>;
+    option: string;
+  }[]
+> {
   post: (page: Page.DataWithTitle<Label, Data>) => Promise<any>;
+  fetchAll: (fetchCondition: {
+    filter?: Page.FilterParam<Label, Data, SelectKeyOption>;
+    sort?: Page.SortParams<Label>;
+  }) => any;
 }
 
-class ApiClient<Label extends string, Data extends Page.Data<Label>>
-  implements IApiClient<Label, Data>
+class ApiClient<
+  Label extends string,
+  Data extends Page.Data<Label>,
+  SelectKeyOption extends {
+    property: Page.Property.SelectObjectKey<Data>;
+    option: string;
+  }[]
+> implements IApiClient<Label, Data, SelectKeyOption>
 {
   private databaseId: string;
   private headers = {};
@@ -27,11 +44,16 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
     this.labelDisplayMap = labelDisplayMap;
   }
 
-  async fetchAll(fetchCondition: Page.FetchParams<Label, Data>) {
-    const getFilter = (formula: Page.FilterParam<Label, Data>) => ({
-      property: this.labelDisplayMap[formula.property as Label],
-      [formula.type]: {
-        [formula.condition]: formula.value,
+  async fetchAll(fetchCondition: {
+    filter?: Page.FilterParam<Label, Data, SelectKeyOption>;
+    sort?: Page.SortParams<Label>;
+  }) {
+    const getFilter = (
+      param: Page.FilterParam<Label, Data, SelectKeyOption>
+    ) => ({
+      property: param.property,
+      [param.type]: {
+        [param.condition]: param.type === "select" ? param.option : param.value,
       },
     });
 
@@ -81,8 +103,12 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
 
 export const getApiClient = <
   Label extends string,
-  Data extends Page.Data<Label>
+  Data extends Page.Data<Label>,
+  SelectKeyOption extends {
+    property: Page.Property.SelectObjectKey<Data>;
+    option: string;
+  }[] = []
 >(
   key: ApiClientKey,
   labelDisplayMap: Page.Property.LabelDisplayMap<Label>
-) => new ApiClient<Label, Data>(key, labelDisplayMap);
+) => new ApiClient<Label, Data, SelectKeyOption>(key, labelDisplayMap);
