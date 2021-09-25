@@ -3,29 +3,16 @@ import { Page } from "./type";
 
 type ApiClientKey = { databaseId: string; token: string };
 
-interface IApiClient<
-  Label extends string,
-  Data extends Page.Data<Label>,
-  SelectKeyOption extends {
-    property: Page.Property.SelectObjectKey<Data>;
-    option: string;
-  }[]
-> {
+interface IApiClient<Label extends string, Data extends Page.Data<Label>> {
   post: (page: Page.DataWithTitle<Label, Data>) => Promise<any>;
   fetchAll: (fetchCondition: {
-    filter?: Page.FilterParam<Label, Data, SelectKeyOption>;
+    filter?: Page.FilterParam<Label, Data>;
     sort?: Page.SortParams<Label>;
   }) => any;
 }
 
-class ApiClient<
-  Label extends string,
-  Data extends Page.Data<Label>,
-  SelectKeyOption extends {
-    property: Page.Property.SelectObjectKey<Data>;
-    option: string;
-  }[]
-> implements IApiClient<Label, Data, SelectKeyOption>
+class ApiClient<Label extends string, Data extends Page.Data<Label>>
+  implements IApiClient<Label, Data>
 {
   private databaseId: string;
   private headers = {};
@@ -45,15 +32,13 @@ class ApiClient<
   }
 
   async fetchAll(fetchCondition: {
-    filter?: Page.FilterParam<Label, Data, SelectKeyOption>;
+    filter?: Page.FilterParam<Label, Data>;
     sort?: Page.SortParams<Label>;
   }) {
-    const getFilter = (
-      param: Page.FilterParam<Label, Data, SelectKeyOption>
-    ) => ({
+    const getFilter = (param: Page.FilterParam<Label, Data>) => ({
       property: param.property,
       [param.type]: {
-        [param.condition]: param.type === "select" ? param.option : param.value,
+        [param.condition]: param.value,
       },
     });
 
@@ -103,12 +88,8 @@ class ApiClient<
 
 export const getApiClient = <
   Label extends string,
-  Data extends Page.Data<Label>,
-  SelectKeyOption extends {
-    property: Page.Property.SelectObjectKey<Data>;
-    option: string;
-  }[] = []
+  Data extends Page.Data<Label>
 >(
   key: ApiClientKey,
   labelDisplayMap: Page.Property.LabelDisplayMap<Label>
-) => new ApiClient<Label, Data, SelectKeyOption>(key, labelDisplayMap);
+) => new ApiClient<Label, Data>(key, labelDisplayMap);
