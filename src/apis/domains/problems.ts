@@ -42,7 +42,7 @@ export namespace ProblemParams {
 export const problemsApiClient = {
   fetchProblems: async (params: ProblemParams.FetchProblems) => {
     return await apiClient.fetchAll({
-      filter: Page.and([
+      filter: Page.or([
         params.keyword
           ? {
               type: "text",

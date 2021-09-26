@@ -6,8 +6,8 @@ namespace _Page {
       type: "select";
       option: T | undefined;
     };
-    export type _Type = _Number | _RichText | _Select<string>;
     export type _Title = Omit<_RichText, "type"> & { type: "title" };
+    export type _Type = _Number | _RichText | _Select<string>;
 
     export const _number = (value: number): _Number => ({
       type: "number",
@@ -90,14 +90,20 @@ namespace _Page {
       | "starts_with"
       | "ends_with";
     type SelectCondition = "equals" | "does_not_equal";
+    type EmptyCondition = "is_empty" | "is_not_empty";
 
     // https://github.com/microsoft/TypeScript/issues/38646#issuecomment-700829042
     type _TypeObjectKey<
       Keyword extends string,
-      Data extends _Data._DataType<string>
+      Label extends string,
+      Data extends _Data._DataType<Label>
     > = keyof {
       [K in keyof Data as Data[K] extends { type: Keyword } ? K : never]: any;
-    };
+    } extends infer L
+      ? L extends Label
+        ? L
+        : never
+      : never;
 
     type _SelectObjectKeyValue<Data extends _Data._DataType<string>> = {
       [K in keyof Data as Data[K] extends { type: "select"; option: any }
@@ -112,25 +118,47 @@ namespace _Page {
     > =
       | {
           type: "number";
-          property: _TypeObjectKey<"number", Data>;
+          property: _TypeObjectKey<"number", Label, Data>;
           condition: NumberCondition;
           value: number;
         }
       | {
           type: "text";
-          property: "title" | _TypeObjectKey<"rich_text", Data>;
+          property: "title" | _TypeObjectKey<"rich_text", Label, Data>;
           condition: TextCondition;
           value: string;
         }
       | ({
           type: "select";
-          condition: SelectCondition;
         } & {
           [K in keyof Select]: {
             property: K extends Label ? K : never;
+            condition: SelectCondition;
             value: Select[K];
           };
-        }[keyof Select]);
+        }[keyof Select])
+      | {
+          type: "text";
+          property: "title";
+          condition: EmptyCondition;
+          value: true;
+        }
+      | ({
+          [K in keyof Data as Data[K] extends { type: _Property._Type["type"] }
+            ? K
+            : never]: {
+            type: Data[K]["type"] extends "rich_text"
+              ? "text"
+              : Data[K]["type"];
+            property: K extends "title" | Label ? K : never;
+            condition: EmptyCondition;
+            value: true;
+          };
+        } extends infer E
+          ? E[keyof E] extends { property: "title" | Label }
+            ? E[keyof E]
+            : never
+          : never);
 
     type _LogicalOperator = "or" | "and";
     type _CompoundFilter<
