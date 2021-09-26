@@ -1,5 +1,6 @@
 import axios from "axios";
-import { Page } from "./type";
+import { ApiResponse } from "./types/ApiResponse";
+import { Page } from "./types/Page";
 
 type ApiClientKey = { databaseId: string; token: string };
 
@@ -8,7 +9,7 @@ interface IApiClient<Label extends string, Data extends Page.Data<Label>> {
   fetchAll: (fetchCondition: {
     filter?: Page.FilterParam<Label, Data>;
     sort?: Page.SortParams<Label>;
-  }) => any;
+  }) => Promise<any>;
 }
 
 class ApiClient<Label extends string, Data extends Page.Data<Label>>
@@ -69,8 +70,7 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
         ? {}
         : { sorts: getSorts(fetchCondition.sort) };
 
-    console.log(JSON.stringify(filter));
-    return axios.post(
+    const x = await axios.post<ApiResponse.FetchPage>(
       `https://api.notion.com/v1/databases/${this.databaseId}/query`,
       {
         ...filter,
@@ -78,10 +78,12 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
       },
       { headers: this.headers }
     );
+
+    return x.data;
   }
 
   async post(page: Partial<Page.DataWithTitle<Label, Data>>) {
-    return axios.post<any>(
+    return axios.post<void>(
       "https://api.notion.com/v1/pages",
       {
         parent: { database_id: this.databaseId },

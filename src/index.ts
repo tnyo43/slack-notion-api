@@ -7,16 +7,9 @@ const main = async () => {
       keyword: "洗濯物",
       stressLevel: 2,
     });
-    (
-      result.data.results as {
-        created_time: string;
-        properties: {};
-      }[]
-    ).forEach((result) =>
-      console.log(JSON.stringify(result.properties), result.created_time)
-    );
+    result.results.forEach((r) => console.log(JSON.stringify(r.properties)));
   } catch (error: any) {
-    debug("post", "error", error.response.data);
+    debug("post", "error", error);
   }
 };
 

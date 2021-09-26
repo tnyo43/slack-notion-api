@@ -1,6 +1,6 @@
 import { getApiClient } from "../../libs/notion";
 import { env } from "../../constants/env";
-import { Page } from "../../libs/notion/type";
+import { Page } from "../../libs/notion/types/Page";
 
 type Label = "stressLevel";
 
