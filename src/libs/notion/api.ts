@@ -35,12 +35,17 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
     filter?: Page.FilterParam<Label, Data>;
     sort?: Page.SortParams<Label>;
   }) {
-    const getFilter = (param: Page.FilterParam<Label, Data>) => ({
-      property: param.property,
-      [param.type]: {
-        [param.condition]: param.value,
-      },
-    });
+    const getFilter = (param: Page.FilterParam<Label, Data>): any =>
+      param.type === "binop"
+        ? {
+            [param.op]: param.terms.map(getFilter),
+          }
+        : {
+            property: this.labelDisplayMap[param.property],
+            [param.type]: {
+              [param.condition]: param.value,
+            },
+          };
 
     const filter =
       fetchCondition.filter === undefined
@@ -64,6 +69,7 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
         ? {}
         : { sorts: getSorts(fetchCondition.sort) };
 
+    console.log(JSON.stringify(filter));
     return axios.post(
       `https://api.notion.com/v1/databases/${this.databaseId}/query`,
       {

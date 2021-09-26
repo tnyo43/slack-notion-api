@@ -42,22 +42,24 @@ export namespace ProblemParams {
 export const problemsApiClient = {
   fetchProblems: async (params: ProblemParams.FetchProblems) => {
     return await apiClient.fetchAll({
-      filter: params.keyword
-        ? {
-            type: "text",
-            property: "title",
-            condition: "contains",
-            value: params.keyword,
-          }
-        : undefined,
-      // filter: params.stressLevel
-      //   ? {
-      //       type: "select",
-      //       property: "stressLevel",
-      //       condition: "equals",
-      //       value: "😭😭😭",
-      //     }
-      //   : undefined,
+      filter: Page.and([
+        params.keyword
+          ? {
+              type: "text",
+              property: "title",
+              condition: "contains",
+              value: params.keyword,
+            }
+          : null,
+        stressLevelOfNumber(params.stressLevel)
+          ? {
+              type: "select",
+              property: "stressLevel",
+              condition: "equals",
+              value: stressLevelOfNumber(params.stressLevel),
+            }
+          : null,
+      ]),
       sort: [
         {
           property: "stressLevel",

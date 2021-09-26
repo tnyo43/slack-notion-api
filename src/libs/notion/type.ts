@@ -105,20 +105,28 @@ namespace _Page {
         : never]: Data[K] extends { option: infer O } ? O : never;
     };
 
-    export type _Param<
+    export type _Atom<
       Label extends string,
       Data extends _Data._DataType<Label>,
       Select = _SelectObjectKeyValue<Data>
     > =
       | {
           type: "number";
-          property: _TypeObjectKey<"number", Data>;
+          property: _TypeObjectKey<"number", Data> extends infer L
+            ? L extends Label
+              ? L
+              : never
+            : never;
           condition: NumberCondition;
           value: number;
         }
       | {
           type: "text";
-          property: "title" | _TypeObjectKey<"rich_text", Data>;
+          property: "title" | _TypeObjectKey<"rich_text", Data> extends infer L
+            ? L extends "title" | Label
+              ? L
+              : never
+            : never;
           condition: TextCondition;
           value: string;
         }
@@ -127,10 +135,41 @@ namespace _Page {
           condition: SelectCondition;
         } & {
           [K in keyof Select]: {
-            property: K;
+            property: K extends Label ? K : never;
             value: Select[K];
           };
         }[keyof Select]);
+
+    type _LogicalOperator = "or" | "and";
+    type _CompoundFilter<
+      Label extends string,
+      Data extends _Data._DataType<Label>
+    > = {
+      type: "binop";
+      op: _LogicalOperator;
+      terms: (_Atom<Label, Data> | _CompoundFilter<Label, Data>)[];
+    };
+
+    const _binop =
+      (op: _LogicalOperator) =>
+      <Label extends string, Data extends _Data._DataType<Label>>(
+        terms: (_Atom<Label, Data> | _CompoundFilter<Label, Data> | null)[]
+      ): _CompoundFilter<Label, Data> => ({
+        type: "binop",
+        op,
+        terms: terms.filter((t) => t !== null) as (
+          | _Atom<Label, Data>
+          | _CompoundFilter<Label, Data>
+        )[],
+      });
+
+    export const _and = _binop("and");
+    export const _or = _binop("or");
+
+    export type _Param<
+      Label extends string,
+      Data extends _Data._DataType<Label>
+    > = _Atom<Label, Data> | _CompoundFilter<Label, Data>;
   }
 
   export namespace _Sort {
@@ -207,6 +246,8 @@ export namespace Page {
     Data extends _Page._Data._DataType<Label> = _Page._Data._DataType<Label>
   > = _Page._Data._Page<Label, Data>;
 
+  export const and = _Page._Filter._and;
+  export const or = _Page._Filter._or;
   export type FilterParam<
     Label extends string,
     Data extends _Page._Data._DataType<Label>
