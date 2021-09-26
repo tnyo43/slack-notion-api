@@ -59,13 +59,13 @@ namespace _Page {
         : {};
 
     export type _LabelDisplayMap<Label extends string> = {
-      [key in Label | "title"]: string;
+      [K in Label | "title"]: string;
     };
   }
 
   export namespace _Data {
     export type _DataType<Label extends string> = {
-      [key in Label]: _Property._Type;
+      [K in Label]: _Property._Type;
     };
 
     export type _Page<
@@ -99,13 +99,6 @@ namespace _Page {
       [K in keyof Data as Data[K] extends { type: Keyword } ? K : never]: any;
     };
 
-    type _TextObjectKey<Data extends _Data._DataType<string>> = _TypeObjectKey<
-      "rich_text",
-      Data
-    >;
-    type _NumberObjectKey<Data extends _Data._DataType<string>> =
-      _TypeObjectKey<"number", Data>;
-
     type _SelectObjectKeyValue<Data extends _Data._DataType<string>> = {
       [K in keyof Data as Data[K] extends { type: "select"; option: any }
         ? K
@@ -119,13 +112,13 @@ namespace _Page {
     > =
       | {
           type: "number";
-          property: _NumberObjectKey<Data>;
+          property: _TypeObjectKey<"number", Data>;
           condition: NumberCondition;
           value: number;
         }
       | {
           type: "text";
-          property: "title" | _TextObjectKey<Data>;
+          property: "title" | _TypeObjectKey<"rich_text", Data>;
           condition: TextCondition;
           value: string;
         }
@@ -133,9 +126,9 @@ namespace _Page {
           type: "select";
           condition: SelectCondition;
         } & {
-          [Key in keyof Select]: {
-            property: Key;
-            value: Select[Key];
+          [K in keyof Select]: {
+            property: K;
+            value: Select[K];
           };
         }[keyof Select]);
   }
