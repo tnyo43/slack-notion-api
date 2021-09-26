@@ -94,10 +94,15 @@ namespace _Page {
     // https://github.com/microsoft/TypeScript/issues/38646#issuecomment-700829042
     type _TypeObjectKey<
       Keyword extends string,
+      Label extends string,
       Data extends _Data._DataType<string>
     > = keyof {
-      [K in keyof Data as Data[K] extends { type: Keyword } ? K : never]: any;
-    };
+      [K in keyof Data as Data extends { type: Keyword } ? K : never]: any;
+    } extends infer L
+      ? L extends Label
+        ? L
+        : never
+      : never;
 
     type _SelectObjectKeyValue<Data extends _Data._DataType<string>> = {
       [K in keyof Data as Data[K] extends { type: "select"; option: any }
@@ -112,21 +117,13 @@ namespace _Page {
     > =
       | {
           type: "number";
-          property: _TypeObjectKey<"number", Data> extends infer L
-            ? L extends Label
-              ? L
-              : never
-            : never;
+          property: _TypeObjectKey<"number", Label, Data>;
           condition: NumberCondition;
           value: number;
         }
       | {
           type: "text";
-          property: "title" | _TypeObjectKey<"rich_text", Data> extends infer L
-            ? L extends "title" | Label
-              ? L
-              : never
-            : never;
+          property: "title" | _TypeObjectKey<"rich_text", Label, Data>;
           condition: TextCondition;
           value: string;
         }
