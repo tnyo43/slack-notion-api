@@ -1,14 +1,16 @@
 import { getApiClient } from "../../libs/notion";
 import { env } from "../../constants/env";
-import { Page } from "../../libs/notion/type";
+import { Page } from "../../libs/notion/types/Page";
 
 type Label = "stressLevel";
 
 type LabelOfstressLevel = "😗" | "😭😭😭" | "🤢🤢🤢🤢🤢";
-type DataType = { stressLevel: Page.Select<LabelOfstressLevel> };
-type PageType = DataType & { title: Page.Title };
+type Data = {
+  stressLevel: Page.Property.Select<LabelOfstressLevel>;
+};
+type PageType = Page.DataWithTitle<Label, Data>;
 
-const labelDisplayMap: Page.LabelDisplayMap<Label> = {
+const labelDisplayMap: Page.Property.LabelDisplayMap<Label> = {
   title: "Name",
   stressLevel: "つらさ度合",
 };
@@ -27,6 +29,10 @@ const stressLevelOfNumber = (
   x === 1 ? "😗" : x === 2 ? "😭😭😭" : x === 3 ? "🤢🤢🤢🤢🤢" : undefined;
 
 export namespace ProblemParams {
+  export type FetchProblems = {
+    keyword?: string;
+    stressLevel?: 1 | 2 | 3;
+  };
   export type PostProblem = {
     title: string;
     stressLevel: 1 | 2 | 3 | undefined;
@@ -34,14 +40,47 @@ export namespace ProblemParams {
 }
 
 export const problemsApiClient = {
+  fetchProblems: async (params: ProblemParams.FetchProblems) => {
+    return await apiClient.fetchAll({
+      filter: Page.or([
+        params.keyword
+          ? {
+              type: "text",
+              property: "title",
+              condition: "contains",
+              value: params.keyword,
+            }
+          : null,
+        stressLevelOfNumber(params.stressLevel)
+          ? {
+              type: "select",
+              property: "stressLevel",
+              condition: "equals",
+              value: stressLevelOfNumber(params.stressLevel),
+            }
+          : null,
+      ]),
+      sort: [
+        {
+          property: "stressLevel",
+          direction: "descending",
+        },
+        {
+          property: "created_time",
+          direction: "descending",
+        },
+      ],
+    });
+  },
+
   postProblem: async (params: ProblemParams.PostProblem) => {
     const stressLevel = stressLevelOfNumber(params.stressLevel);
     return await apiClient.post({
-      title: Page.title(params.title),
+      title: Page.Property.title(params.title),
       stressLevel:
         stressLevel === undefined
           ? undefined
-          : Page.select<LabelOfstressLevel>(stressLevel),
+          : Page.Property.select<LabelOfstressLevel>(stressLevel),
     });
   },
 };
