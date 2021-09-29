@@ -1,4 +1,4 @@
-import { apiCliet } from '../../apis';
+import { apiCliet } from '~/apis';
 import { InvalidMessage } from './invalid';
 
 type StressLevel = 1 | 2 | 3 | undefined;

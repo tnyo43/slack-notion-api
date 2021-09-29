@@ -16,6 +16,6 @@
     "semi": "off",
     "quotes": ["error", "single"],
     "comma-dangle": "off",
-    "space-before-function-paren": ["warn", "always"]
+    "space-before-function-paren": ["off"]
   }
 }

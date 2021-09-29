@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export type SlackMessage = {
   team_id: string;
   channel_id: string;

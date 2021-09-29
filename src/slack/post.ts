@@ -1,6 +1,6 @@
-import { env } from '../constants/env';
-import { debug } from '../utils/debug';
-import { problemKeyword, problemMessageHandler } from '../notion/domains/problem';
+import { env } from '~/constants/env';
+import { debug } from '~/utils/debug';
+import { problemKeyword, problemMessageHandler } from '~/notion/domains/problem';
 
 const defaultInvalidMessage = `次のキーワードを入力してください "${problemKeyword}"`;
 

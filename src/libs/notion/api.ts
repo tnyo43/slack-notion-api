@@ -6,15 +6,10 @@ type ApiClientKey = { databaseId: string; token: string };
 
 interface IApiClient<Label extends string, Data extends Page.Data<Label>> {
   post: (page: Page.DataWithTitle<Label, Data>) => Promise<any>;
-  fetchAll: (fetchCondition: {
-    filter?: Page.FilterParam<Label, Data>;
-    sort?: Page.SortParams<Label>;
-  }) => Promise<any>;
+  fetchAll: (fetchCondition: { filter?: Page.FilterParam<Label, Data>; sort?: Page.SortParams<Label> }) => Promise<any>;
 }
 
-class ApiClient<Label extends string, Data extends Page.Data<Label>>
-  implements IApiClient<Label, Data>
-{
+class ApiClient<Label extends string, Data extends Page.Data<Label>> implements IApiClient<Label, Data> {
   private databaseId: string;
   private headers = {};
   private labelDisplayMap: Page.Property.LabelDisplayMap<Label>;
@@ -29,10 +24,7 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
     this.labelDisplayMap = labelDisplayMap;
   }
 
-  async fetchAll(fetchCondition: {
-    filter?: Page.FilterParam<Label, Data>;
-    sort?: Page.SortParams<Label>;
-  }) {
+  async fetchAll(fetchCondition: { filter?: Page.FilterParam<Label, Data>; sort?: Page.SortParams<Label> }) {
     const getFilter = (param: Page.FilterParam<Label, Data>): any =>
       param.type === 'binop'
         ? {
@@ -45,8 +37,7 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
             },
           };
 
-    const filter =
-      fetchCondition.filter === undefined ? {} : { filter: getFilter(fetchCondition.filter) };
+    const filter = fetchCondition.filter === undefined ? {} : { filter: getFilter(fetchCondition.filter) };
 
     const getSorts = (sorts: Page.SortParams<Label>) =>
       sorts.map(({ property, direction }) => ({
