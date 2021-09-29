@@ -1,5 +1,5 @@
-import { env } from "../constants/env";
-import { SlackMessage } from "./type";
+import { env } from '../constants/env';
+import { SlackMessage } from './type';
 
 export const isFromTarget = (message: SlackMessage) =>
   message.team_id === env.SLACK_TEAM_ID &&

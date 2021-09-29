@@ -1,4 +1,4 @@
-import { ProblemParams, problemsApiClient } from "./domains/problems";
+import { ProblemParams, problemsApiClient } from './domains/problems';
 
 export namespace Params {
   export type FetchProblem = ProblemParams.FetchProblems;

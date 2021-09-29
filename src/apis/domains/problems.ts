@@ -1,18 +1,18 @@
-import { getApiClient } from "../../libs/notion";
-import { env } from "../../constants/env";
-import { Page } from "../../libs/notion/types/Page";
+import { getApiClient } from '~/libs/notion';
+import { env } from '~/constants/env';
+import { Page } from '~/libs/notion/types/Page';
 
-type Label = "stressLevel";
+type Label = 'stressLevel';
 
-type LabelOfstressLevel = "😗" | "😭😭😭" | "🤢🤢🤢🤢🤢";
+type LabelOfstressLevel = '😗' | '😭😭😭' | '🤢🤢🤢🤢🤢';
 type Data = {
   stressLevel: Page.Property.Select<LabelOfstressLevel>;
 };
 type PageType = Page.DataWithTitle<Label, Data>;
 
 const labelDisplayMap: Page.Property.LabelDisplayMap<Label> = {
-  title: "Name",
-  stressLevel: "つらさ度合",
+  title: 'Name',
+  stressLevel: 'つらさ度合',
 };
 
 const apiClient = getApiClient<Label, PageType>(
@@ -23,10 +23,8 @@ const apiClient = getApiClient<Label, PageType>(
   labelDisplayMap
 );
 
-const stressLevelOfNumber = (
-  x: 1 | 2 | 3 | undefined
-): LabelOfstressLevel | undefined =>
-  x === 1 ? "😗" : x === 2 ? "😭😭😭" : x === 3 ? "🤢🤢🤢🤢🤢" : undefined;
+const stressLevelOfNumber = (x: 1 | 2 | 3 | undefined): LabelOfstressLevel | undefined =>
+  x === 1 ? '😗' : x === 2 ? '😭😭😭' : x === 3 ? '🤢🤢🤢🤢🤢' : undefined;
 
 export namespace ProblemParams {
   export type FetchProblems = {
@@ -45,29 +43,29 @@ export const problemsApiClient = {
       filter: Page.or([
         params.keyword
           ? {
-              type: "text",
-              property: "title",
-              condition: "contains",
+              type: 'text',
+              property: 'title',
+              condition: 'contains',
               value: params.keyword,
             }
           : null,
         stressLevelOfNumber(params.stressLevel)
           ? {
-              type: "select",
-              property: "stressLevel",
-              condition: "equals",
+              type: 'select',
+              property: 'stressLevel',
+              condition: 'equals',
               value: stressLevelOfNumber(params.stressLevel),
             }
           : null,
       ]),
       sort: [
         {
-          property: "stressLevel",
-          direction: "descending",
+          property: 'stressLevel',
+          direction: 'descending',
         },
         {
-          property: "created_time",
-          direction: "descending",
+          property: 'created_time',
+          direction: 'descending',
         },
       ],
     });
@@ -77,10 +75,7 @@ export const problemsApiClient = {
     const stressLevel = stressLevelOfNumber(params.stressLevel);
     return await apiClient.post({
       title: Page.Property.title(params.title),
-      stressLevel:
-        stressLevel === undefined
-          ? undefined
-          : Page.Property.select<LabelOfstressLevel>(stressLevel),
+      stressLevel: stressLevel === undefined ? undefined : Page.Property.select<LabelOfstressLevel>(stressLevel),
     });
   },
 };

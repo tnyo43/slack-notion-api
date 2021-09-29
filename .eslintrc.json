@@ -1,9 +1,21 @@
 {
   "env": {
-    "es6": true
+    "browser": true,
+    "es2021": true
   },
-  "plugins": ["prettier"],
+  "extends": ["standard"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint", "prettier"],
   "rules": {
-    "prettier/prettier": "error"
+    "no-restricted-imports": ["warn", { "patterns": ["../"] }],
+    "prettier/prettier": "error",
+    "semi": "off",
+    "quotes": ["error", "single"],
+    "comma-dangle": "off",
+    "space-before-function-paren": ["warn", "always"]
   }
 }

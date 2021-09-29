@@ -1,4 +1,4 @@
 export type InvalidMessage = {
-  type: "invalid";
+  type: 'invalid';
   content: string;
 };

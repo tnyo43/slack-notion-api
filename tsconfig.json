@@ -13,7 +13,11 @@
     "resolveJsonModule": true,
     "isolatedModules": false,
     "jsx": "preserve",
-    "keyofStringsOnly": true
+    "keyofStringsOnly": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"]
+    }
   },
   "include": ["src/**/*"]
 }

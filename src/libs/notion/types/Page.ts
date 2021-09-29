@@ -1,29 +1,29 @@
 namespace _Page {
   export namespace _Property {
-    export type _Number = { type: "number"; value: number | undefined };
-    export type _RichText = { type: "rich_text"; content: string | undefined };
+    export type _Number = { type: 'number'; value: number | undefined };
+    export type _RichText = { type: 'rich_text'; content: string | undefined };
     export type _Select<T extends string> = {
-      type: "select";
+      type: 'select';
       option: T | undefined;
     };
-    export type _Title = Omit<_RichText, "type"> & { type: "title" };
+    export type _Title = Omit<_RichText, 'type'> & { type: 'title' };
     export type _Type = _Number | _RichText | _Select<string>;
 
     export const _number = (value: number): _Number => ({
-      type: "number",
+      type: 'number',
       value,
     });
     export const _richText = (content: string): _RichText => ({
-      type: "rich_text",
+      type: 'rich_text',
       content,
     });
     export const _select = <T extends string>(option: T): _Select<T> => ({
-      type: "select",
+      type: 'select',
       option,
     });
     export const _title = (content: string): _Title => ({
       ..._richText(content),
-      type: "title",
+      type: 'title',
     });
 
     export const _numberOf = (number: _Number) => ({
@@ -59,7 +59,7 @@ namespace _Page {
         : {};
 
     export type _LabelDisplayMap<Label extends string> = {
-      [K in Label | "title"]: string;
+      [K in Label | 'title']: string;
     };
   }
 
@@ -76,21 +76,21 @@ namespace _Page {
 
   export namespace _Filter {
     type NumberCondition =
-      | "equals"
-      | "does_not_equal"
-      | "greater_than"
-      | "less_than"
-      | "greater_than_or_equal_to"
-      | "less_than_or_equal_to";
+      | 'equals'
+      | 'does_not_equal'
+      | 'greater_than'
+      | 'less_than'
+      | 'greater_than_or_equal_to'
+      | 'less_than_or_equal_to';
     type TextCondition =
-      | "equals"
-      | "does_not_equal"
-      | "contains"
-      | "does_not_contain"
-      | "starts_with"
-      | "ends_with";
-    type SelectCondition = "equals" | "does_not_equal";
-    type EmptyCondition = "is_empty" | "is_not_empty";
+      | 'equals'
+      | 'does_not_equal'
+      | 'contains'
+      | 'does_not_contain'
+      | 'starts_with'
+      | 'ends_with';
+    type SelectCondition = 'equals' | 'does_not_equal';
+    type EmptyCondition = 'is_empty' | 'is_not_empty';
 
     // https://github.com/microsoft/TypeScript/issues/38646#issuecomment-700829042
     type _TypeObjectKey<
@@ -106,7 +106,7 @@ namespace _Page {
       : never;
 
     type _SelectObjectKeyValue<Data extends _Data._DataType<string>> = {
-      [K in keyof Data as Data[K] extends { type: "select"; option: any }
+      [K in keyof Data as Data[K] extends { type: 'select'; option: any }
         ? K
         : never]: Data[K] extends { option: infer O } ? O : never;
     };
@@ -117,19 +117,19 @@ namespace _Page {
       Select = _SelectObjectKeyValue<Data>
     > =
       | {
-          type: "number";
-          property: _TypeObjectKey<"number", Label, Data>;
+          type: 'number';
+          property: _TypeObjectKey<'number', Label, Data>;
           condition: NumberCondition;
           value: number;
         }
       | {
-          type: "text";
-          property: "title" | _TypeObjectKey<"rich_text", Label, Data>;
+          type: 'text';
+          property: 'title' | _TypeObjectKey<'rich_text', Label, Data>;
           condition: TextCondition;
           value: string;
         }
       | ({
-          type: "select";
+          type: 'select';
         } & {
           [K in keyof Select]: {
             property: K extends Label ? K : never;
@@ -138,34 +138,27 @@ namespace _Page {
           };
         }[keyof Select])
       | {
-          type: "text";
-          property: "title";
+          type: 'text';
+          property: 'title';
           condition: EmptyCondition;
           value: true;
         }
       | ({
-          [K in keyof Data as Data[K] extends { type: _Property._Type["type"] }
-            ? K
-            : never]: {
-            type: Data[K]["type"] extends "rich_text"
-              ? "text"
-              : Data[K]["type"];
-            property: K extends "title" | Label ? K : never;
+          [K in keyof Data as Data[K] extends { type: _Property._Type['type'] } ? K : never]: {
+            type: Data[K]['type'] extends 'rich_text' ? 'text' : Data[K]['type'];
+            property: K extends 'title' | Label ? K : never;
             condition: EmptyCondition;
             value: true;
           };
         } extends infer E
-          ? E[keyof E] extends { property: "title" | Label }
+          ? E[keyof E] extends { property: 'title' | Label }
             ? E[keyof E]
             : never
           : never);
 
-    type _LogicalOperator = "or" | "and";
-    type _CompoundFilter<
-      Label extends string,
-      Data extends _Data._DataType<Label>
-    > = {
-      type: "binop";
+    type _LogicalOperator = 'or' | 'and';
+    type _CompoundFilter<Label extends string, Data extends _Data._DataType<Label>> = {
+      type: 'binop';
       op: _LogicalOperator;
       terms: (_Atom<Label, Data> | _CompoundFilter<Label, Data>)[];
     };
@@ -175,7 +168,7 @@ namespace _Page {
       <Label extends string, Data extends _Data._DataType<Label>>(
         terms: (_Atom<Label, Data> | _CompoundFilter<Label, Data> | null)[]
       ): _CompoundFilter<Label, Data> => ({
-        type: "binop",
+        type: 'binop',
         op,
         terms: terms.filter((t) => t !== null) as (
           | _Atom<Label, Data>
@@ -183,21 +176,20 @@ namespace _Page {
         )[],
       });
 
-    export const _and = _binop("and");
-    export const _or = _binop("or");
+    export const _and = _binop('and');
+    export const _or = _binop('or');
 
-    export type _Param<
-      Label extends string,
-      Data extends _Data._DataType<Label>
-    > = _Atom<Label, Data> | _CompoundFilter<Label, Data>;
+    export type _Param<Label extends string, Data extends _Data._DataType<Label>> =
+      | _Atom<Label, Data>
+      | _CompoundFilter<Label, Data>;
   }
 
   export namespace _Sort {
-    type Direction = "ascending" | "descending";
-    type Timestamp = "created_time" | "last_edited_time";
+    type Direction = 'ascending' | 'descending';
+    type Timestamp = 'created_time' | 'last_edited_time';
 
     export const _isTimestamp = (text: string): text is Timestamp =>
-      text === "created_time" || text === "last_edited_time";
+      text === 'created_time' || text === 'last_edited_time';
 
     export type _Params<Label extends string> = {
       property: Label | Timestamp;
@@ -205,22 +197,16 @@ namespace _Page {
     }[];
   }
 
-  export const _notionPageApiObjectOf = <
-    Label extends string,
-    Data extends _Data._DataType<Label>
-  >(
+  export const _notionPageApiObjectOf = <Label extends string, Data extends _Data._DataType<Label>>(
     page: Partial<_Data._Page<Label, Data>>,
     keyDisplayMap: _Property._LabelDisplayMap<Label>
   ) => {
-    const convert = (
-      displayName: string,
-      property: _Property._Type | undefined
-    ) => {
+    const convert = (displayName: string, property: _Property._Type | undefined) => {
       if (property === undefined) return {};
       const obj =
-        property.type === "number"
+        property.type === 'number'
           ? _Property._numberOf(property)
-          : property.type === "rich_text"
+          : property.type === 'rich_text'
           ? _Property._richTextOf(property)
           : _Property._selectOf(property);
       return {
@@ -255,8 +241,7 @@ export namespace Page {
     export const select = _Page._Property._select;
     export const title = _Page._Property._title;
 
-    export type LabelDisplayMap<Label extends string> =
-      _Page._Property._LabelDisplayMap<Label>;
+    export type LabelDisplayMap<Label extends string> = _Page._Property._LabelDisplayMap<Label>;
   }
 
   export type Data<Label extends string> = _Page._Data._DataType<Label>;

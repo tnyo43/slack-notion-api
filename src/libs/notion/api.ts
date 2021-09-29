@@ -1,6 +1,6 @@
-import axios from "axios";
-import { ApiResponse } from "./types/ApiResponse";
-import { Page } from "./types/Page";
+import axios from 'axios';
+import { ApiResponse } from './types/ApiResponse';
+import { Page } from './types/Page';
 
 type ApiClientKey = { databaseId: string; token: string };
 
@@ -19,15 +19,12 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
   private headers = {};
   private labelDisplayMap: Page.Property.LabelDisplayMap<Label>;
 
-  constructor(
-    key: ApiClientKey,
-    labelDisplayMap: Page.Property.LabelDisplayMap<Label>
-  ) {
+  constructor(key: ApiClientKey, labelDisplayMap: Page.Property.LabelDisplayMap<Label>) {
     this.databaseId = key.databaseId;
     this.headers = {
       Authorization: `Bearer ${key.token}`,
-      "Notion-Version": "2021-05-13",
-      "Content-Type": "application/json",
+      'Notion-Version': '2021-05-13',
+      'Content-Type': 'application/json',
     };
     this.labelDisplayMap = labelDisplayMap;
   }
@@ -37,7 +34,7 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
     sort?: Page.SortParams<Label>;
   }) {
     const getFilter = (param: Page.FilterParam<Label, Data>): any =>
-      param.type === "binop"
+      param.type === 'binop'
         ? {
             [param.op]: param.terms.map(getFilter),
           }
@@ -49,9 +46,7 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
           };
 
     const filter =
-      fetchCondition.filter === undefined
-        ? {}
-        : { filter: getFilter(fetchCondition.filter) };
+      fetchCondition.filter === undefined ? {} : { filter: getFilter(fetchCondition.filter) };
 
     const getSorts = (sorts: Page.SortParams<Label>) =>
       sorts.map(({ property, direction }) => ({
@@ -65,10 +60,7 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
         direction,
       }));
 
-    const sorts =
-      fetchCondition.sort === undefined
-        ? {}
-        : { sorts: getSorts(fetchCondition.sort) };
+    const sorts = fetchCondition.sort === undefined ? {} : { sorts: getSorts(fetchCondition.sort) };
 
     const x = await axios.post<ApiResponse.FetchPage>(
       `https://api.notion.com/v1/databases/${this.databaseId}/query`,
@@ -84,7 +76,7 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
 
   async post(page: Partial<Page.DataWithTitle<Label, Data>>) {
     return axios.post<void>(
-      "https://api.notion.com/v1/pages",
+      'https://api.notion.com/v1/pages',
       {
         parent: { database_id: this.databaseId },
         properties: Page.notionPageApiObjectOf(page, this.labelDisplayMap),
@@ -94,10 +86,7 @@ class ApiClient<Label extends string, Data extends Page.Data<Label>>
   }
 }
 
-export const getApiClient = <
-  Label extends string,
-  Data extends Page.Data<Label>
->(
+export const getApiClient = <Label extends string, Data extends Page.Data<Label>>(
   key: ApiClientKey,
   labelDisplayMap: Page.Property.LabelDisplayMap<Label>
 ) => new ApiClient<Label, Data>(key, labelDisplayMap);

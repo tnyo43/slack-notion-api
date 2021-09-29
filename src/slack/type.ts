@@ -7,7 +7,7 @@ export type SlackMessage = {
 
 export const isValidSlackMessage = (message: any): message is SlackMessage =>
   !!message &&
-  typeof message.team_id === "string" &&
-  typeof message.channel_id === "string" &&
-  typeof message.user_id === "string" &&
-  typeof message.text === "string";
+  typeof message.team_id === 'string' &&
+  typeof message.channel_id === 'string' &&
+  typeof message.user_id === 'string' &&
+  typeof message.text === 'string';
