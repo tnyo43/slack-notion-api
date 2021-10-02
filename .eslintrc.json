@@ -19,6 +19,7 @@
     "no-restricted-imports": ["warn", { "patterns": ["../"] }],
     "prettier/prettier": "error",
     "quotes": ["error", "single"],
-    "@typescript-eslint/no-namespace": "off"
+    "@typescript-eslint/no-namespace": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
   }
 }
