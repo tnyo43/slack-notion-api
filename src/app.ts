@@ -4,6 +4,7 @@ import { isFromTarget } from './slack/isFromTarget';
 import { post } from './slack/post';
 import { isValidSlackMessage } from './slack/type';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const judgeAndPost = async (body: any) =>
   isValidSlackMessage(body) && isFromTarget(body) ? await post(body.text) : undefined;
 
