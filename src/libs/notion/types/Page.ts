@@ -68,10 +68,9 @@ namespace _Page {
       [K in Label]: _Property._Type;
     };
 
-    export type _Page<
-      Label extends string,
-      Data extends _DataType<Label> = _DataType<Label>
-    > = Data & { title: _Property._Title };
+    export type _Page<Label extends string, Data extends _DataType<Label> = _DataType<Label>> = Data & {
+      title: _Property._Title;
+    };
   }
 
   export namespace _Filter {
@@ -82,22 +81,13 @@ namespace _Page {
       | 'less_than'
       | 'greater_than_or_equal_to'
       | 'less_than_or_equal_to';
-    type TextCondition =
-      | 'equals'
-      | 'does_not_equal'
-      | 'contains'
-      | 'does_not_contain'
-      | 'starts_with'
-      | 'ends_with';
+    type TextCondition = 'equals' | 'does_not_equal' | 'contains' | 'does_not_contain' | 'starts_with' | 'ends_with';
     type SelectCondition = 'equals' | 'does_not_equal';
     type EmptyCondition = 'is_empty' | 'is_not_empty';
 
     // https://github.com/microsoft/TypeScript/issues/38646#issuecomment-700829042
-    type _TypeObjectKey<
-      Keyword extends string,
-      Label extends string,
-      Data extends _Data._DataType<Label>
-    > = keyof {
+    type _TypeObjectKey<Keyword extends string, Label extends string, Data extends _Data._DataType<Label>> = keyof {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [K in keyof Data as Data[K] extends { type: Keyword } ? K : never]: any;
     } extends infer L
       ? L extends Label
@@ -106,9 +96,12 @@ namespace _Page {
       : never;
 
     type _SelectObjectKeyValue<Data extends _Data._DataType<string>> = {
-      [K in keyof Data as Data[K] extends { type: 'select'; option: any }
-        ? K
-        : never]: Data[K] extends { option: infer O } ? O : never;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      [K in keyof Data as Data[K] extends { type: 'select'; option: any } ? K : never]: Data[K] extends {
+        option: infer O;
+      }
+        ? O
+        : never;
     };
 
     export type _Atom<
@@ -170,10 +163,7 @@ namespace _Page {
       ): _CompoundFilter<Label, Data> => ({
         type: 'binop',
         op,
-        terms: terms.filter((t) => t !== null) as (
-          | _Atom<Label, Data>
-          | _CompoundFilter<Label, Data>
-        )[],
+        terms: terms.filter((t) => t !== null) as (_Atom<Label, Data> | _CompoundFilter<Label, Data>)[],
       });
 
     export const _and = _binop('and');
@@ -253,10 +243,10 @@ export namespace Page {
 
   export const and = _Page._Filter._and;
   export const or = _Page._Filter._or;
-  export type FilterParam<
-    Label extends string,
-    Data extends _Page._Data._DataType<Label>
-  > = _Page._Filter._Param<Label, Data>;
+  export type FilterParam<Label extends string, Data extends _Page._Data._DataType<Label>> = _Page._Filter._Param<
+    Label,
+    Data
+  >;
 
   export const isTimestamp = _Page._Sort._isTimestamp;
   export type SortParams<Label extends string> = _Page._Sort._Params<Label>;
