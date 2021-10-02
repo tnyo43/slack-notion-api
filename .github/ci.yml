@@ -1,0 +1,20 @@
+name: CI
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Setup NodeJs
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14.11.0"
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Run lint
+        run: yarn lint
