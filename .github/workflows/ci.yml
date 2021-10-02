@@ -5,13 +5,17 @@ on: push
 jobs:
   test:
     runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
     steps:
       - uses: actions/checkout@v1
-
-      - name: Setup NodeJs
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
-          node-version: "14.11.0"
+          node-version: ${{ matrix.node-version }}
 
       - name: Install Dependencies
         run: yarn install
